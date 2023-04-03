@@ -20,7 +20,7 @@ func SplitSecret(secret []byte, n, t uint8) []SecretUnit {
 		parts := split(secret[i], n, t)
 
 		for j := uint8(0); j < n; j++ {
-			secretUnits[j].value[i] = parts[i]
+			secretUnits[j].value[i] = parts[j]
 		}
 	}
 	return secretUnits
@@ -35,6 +35,8 @@ func CombainParts(parts []SecretUnit) []byte {
 }
 
 func makeMatrix(parts []SecretUnit, threshold, secretLen int) (coeffs [][]int, values [][]int) {
+	coeffs = make([][]int, threshold)
+	values = make([][]int, threshold)
 	for i := 0; i < threshold; i++ {
 		// make coefficient matrix
 		coeffsRow := make([]int, threshold)
@@ -73,8 +75,7 @@ func makePoly(M, t uint8) Poly {
 	coeffs[0] = int(M)
 
 	for i := 1; i < int(t); i++ {
-		rand.Seed(time.Now().UnixNano())
-		coeffs[i] = rand.Intn(256)
+		coeffs[i] = rand.New(rand.NewSource(time.Now().UnixNano())).Intn(256)
 	}
 
 	return func(index uint8) uint8 {
