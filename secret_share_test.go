@@ -11,7 +11,7 @@ func TestSplitAndCombain(t *testing.T) {
 	}
 
 	parts := SplitSecret(secrets, 10, 4)
-	selected := parts[1:5]
+	selected := parts[4:8]
 	recovered := CombainParts(selected)
 
 	for i := 0; i < len(secrets); i++ {
@@ -23,8 +23,8 @@ func TestSplitAndCombain(t *testing.T) {
 
 func BenchmarkSplit(b *testing.B) {
 	secrets := make([]byte, 256)
-	for i := uint8(0); int(i) < 256; i++ {
-		secrets[i] = i
+	for i := 0; i < 256; i++ {
+		secrets[i] = byte(i)
 	}
 
 	for i := 0; i < b.N; i++ {
@@ -34,12 +34,12 @@ func BenchmarkSplit(b *testing.B) {
 
 func BenchmarkCombain(b *testing.B) {
 	secrets := make([]byte, 256)
-	for i := uint8(0); int(i) < 256; i++ {
-		secrets[i] = i
+	for i := 0; i < 256; i++ {
+		secrets[i] = byte(i)
 	}
 
-	parts := SplitSecret(secrets, 10, 5)
-	selected := parts[1:6]
+	parts := SplitSecret(secrets, 10, 4)
+	selected := parts[2:6]
 
 	for i := 0; i < b.N; i++ {
 		CombainParts(selected)
