@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"math/rand"
+	"time"
 )
 
 type SecretShareByte struct {
@@ -23,14 +24,23 @@ type SecretUnit struct {
 }
 
 func main() {
-	s := "Hello world!"
-	secret := []byte(s)
+	rand.Seed(time.Now().UnixNano())
+
+	secret := make([]byte, 256)
+	for i := 0; i < 256; i++ {
+		secret[i] = byte(i)
+	}
 
 	fmt.Println(secret)
 	parts := SplitSecrets(secret, 10, 4)
 	recoveredSecret := CombainParts(parts[2:6])
 	fmt.Println(recoveredSecret)
-	fmt.Printf("Recovered secret: %s\n", string(recoveredSecret))
+
+	for i := 0; i < len(secret); i++ {
+		if secret[i] != recoveredSecret[i] {
+			panic(fmt.Sprintf("secret i expect %d, but got %d", secret[i], recoveredSecret[i]))
+		}
+	}
 }
 
 func SplitSecrets(secret []byte, n uint8, t uint8) []SecretUnit {
@@ -84,7 +94,7 @@ func makePoly(M uint8, n uint8, t uint8) []uint8 {
 	coeffs := make([]uint8, t)
 	coeffs[0] = M
 	for i := 1; uint8(i) < t; i++ {
-		randomCoeff := rand.Intn(int(M))
+		randomCoeff := rand.Intn(256)
 		coeffs[i] = uint8(randomCoeff)
 	}
 	return coeffs
@@ -102,7 +112,7 @@ func split(coeff []uint8, M uint8, n uint8) []byte {
 			multip *= i
 		}
 
-		shares[i-1] = uint8(tmp % 257)
+		shares[i-1] = uint8(tmp % 256)
 	}
 
 	return shares
@@ -161,9 +171,9 @@ func remainder(coeffs [][]int, values [][]int) []byte {
 	result := make([]byte, len(value))
 	for i := 0; i < len(value); i++ {
 		v := value[i] / r
-		v = v % 257
+		v = v % 256
 		if v < 0 {
-			v += 257
+			v += 256
 		}
 		result[i] = uint8(v)
 	}
